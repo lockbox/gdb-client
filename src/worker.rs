@@ -12,7 +12,7 @@ use tokio::{
     process, select,
     sync::mpsc,
 };
-use tracing::{debug, error, info, warn};
+use tracing::{debug, error, trace, warn};
 
 type MsgOut = mpsc::Sender<Result<Response, crate::Error>>;
 type StatusOut = mpsc::Sender<Status>;
@@ -258,7 +258,7 @@ async fn write_stdin(
     input.push_str(&msg);
     input.push('\n');
 
-    info!("Sending to gdb {}", input);
+    debug!("Sending to gdb {}", input);
     stdin
         .write_all(&input.as_bytes())
         .await
@@ -271,7 +271,7 @@ async fn process_stdout(result: io::Result<usize>, state: &mut State) -> Result<
     result.map_err(FatalError::Stdout)?;
 
     let line = state.stdout_buf.trim_end();
-    debug!("Got stdout: {}", line);
+    trace!("Found stdout: {}", line);
 
     // no data
     if line.len() == 0 {
@@ -346,7 +346,7 @@ async fn process_parsed_response(
     };
 
     let response = Response::from_parsed(response);
-    info!("Sending response: {:?}", response);
+    debug!("Sending response: {:?}", response);
     send(&out, response).await?;
 
     Ok(())
@@ -360,7 +360,7 @@ async fn process_response_notify(
     if let Some(new_status) = Status::from_notification(&message, payload) {
         state.status = new_status;
 
-        info!("New status {:?}", state.status);
+        debug!("New status {:?}", state.status);
 
         let to_notify = &mut state.notify_next_status;
         debug!("Notifying {} watchers of status", to_notify.len());
@@ -418,11 +418,11 @@ async fn process_parsed_general(
 
     if general == GeneralMessage::Done {
         // Suppress these, as they come after every command
-        debug!("Ignoring done");
+        trace!("Ignoring done");
         return Ok(());
     }
 
-    info!("Got general message: {:?}", general);
+    debug!("Got general message: {:?}", general);
     state.pending_general.push(general);
 
     Ok(())
@@ -432,7 +432,7 @@ async fn process_stderr(result: io::Result<usize>, state: &mut State) -> Result<
     result.map_err(FatalError::Stderr)?;
 
     let line = state.stderr_buf.trim_end();
-    debug!("Got stderr: {}", line);
+    trace!("found stderr: {}", line);
 
     // no data
     if line.len() == 0 {
