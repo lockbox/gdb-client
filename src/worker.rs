@@ -272,6 +272,12 @@ async fn process_stdout(result: io::Result<usize>, state: &mut State) -> Result<
 
     let line = state.stdout_buf.trim_end();
     debug!("Got stdout: {}", line);
+
+    // no data
+    if line.len() == 0 {
+        return Ok(());
+    }
+
     let response = parse_message(&line).map_err(TransientError::from)?;
     state.stdout_buf.clear();
 
@@ -427,6 +433,12 @@ async fn process_stderr(result: io::Result<usize>, state: &mut State) -> Result<
 
     let line = state.stderr_buf.trim_end();
     debug!("Got stderr: {}", line);
+
+    // no data
+    if line.len() == 0 {
+        return Ok(());
+    }
+
     let message = GeneralMessage::InferiorStderr(line.into());
     state.pending_general.push(message);
     state.stderr_buf.clear();
