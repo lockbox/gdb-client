@@ -270,7 +270,7 @@ async fn write_stdin(
 async fn process_stdout(result: io::Result<usize>, state: &mut State) -> Result<(), Error> {
     result.map_err(FatalError::Stdout)?;
 
-    let line = &state.stdout_buf[..state.stdout_buf.len() - 1]; // strip the newline
+    let line = state.stdout_buf.trim_end();
     debug!("Got stdout: {}", line);
     let response = parse_message(&line).map_err(TransientError::from)?;
     state.stdout_buf.clear();
@@ -425,7 +425,7 @@ async fn process_parsed_general(
 async fn process_stderr(result: io::Result<usize>, state: &mut State) -> Result<(), Error> {
     result.map_err(FatalError::Stderr)?;
 
-    let line = &state.stderr_buf[..state.stderr_buf.len() - 1]; // strip the newline
+    let line = state.stderr_buf.trim_end();
     debug!("Got stderr: {}", line);
     let message = GeneralMessage::InferiorStderr(line.into());
     state.pending_general.push(message);
