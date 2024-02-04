@@ -436,6 +436,27 @@ impl Gdb {
             .expect_msg_is("running")
     }
 
+    pub async fn exec_interrupt(&self) -> Result<(), Error> {
+        self.raw_cmd("-exec-interrupt")
+            .await?
+            .expect_result()?
+            .expect_msg_is("done")
+    }
+
+    pub async fn exec_interrupt_all(&self) -> Result<(), Error> {
+        self.raw_cmd("-exec-interrupt --all")
+            .await?
+            .expect_result()?
+            .expect_msg_is("done")
+    }
+
+    pub async fn exec_interrupt_thread_group(&self, thread_group: u32) -> Result<(), Error> {
+        self.raw_cmd(&format!("-exec-interrupt --thread-group {thread_group}"))
+            .await?
+            .expect_result()?
+            .expect_msg_is("done")
+    }
+
     pub async fn break_insert(&self, at: LineSpec) -> Result<Breakpoint, Error> {
         let raw = self
             .raw_cmd(format!("-break-insert {}", at.serialize()))
