@@ -44,12 +44,14 @@ impl LineSpec {
 // TODO: This doesn't include all the potential outputs of gdb.
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Breakpoint {
-    pub number: u32,
+    pub number: i64,
     pub addr: Addr,
     pub file: Option<Utf8PathBuf>,
     pub line: Option<u32>,
     pub thread_groups: Vec<String>,
     pub times: u32,
+    pub original_location: Option<String>,
+    pub enabled: bool,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -62,7 +64,7 @@ pub enum Addr {
 
 impl Breakpoint {
     pub fn from_raw(mut raw: raw::Dict) -> Result<Self, Error> {
-        let number = raw.remove_expect("number")?.expect_number()?;
+        let number = raw.remove_expect("number")?.expect_signed()?;
         let times = raw.remove_expect("times")?.expect_number()?;
 
         let line = raw
@@ -86,6 +88,19 @@ impl Breakpoint {
             Addr::Unknown
         };
 
+        let original_location = raw
+            .remove("original-location")
+            .map(raw::Value::expect_string)
+            .transpose()?;
+
+        // "y" for yes, "n" for no
+        let enabled = raw
+            .remove_expect("enabled")?
+            .expect_string()?
+            .as_str()
+            .cmp("y")
+            .is_eq();
+
         let thread_groups = raw
             .remove_expect("thread-groups")?
             .expect_list()?
@@ -100,6 +115,8 @@ impl Breakpoint {
             line,
             thread_groups,
             times,
+            original_location,
+            enabled,
         })
     }
 }
