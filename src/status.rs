@@ -25,7 +25,7 @@ pub struct Stopped {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum StopReason {
     /// A breakpoint was reached
-    Breakpoint { number: u32 },
+    Breakpoint { number: i64 },
     /// A watchpoint was triggered
     Watchpoint,
     /// A read watchpoint was triggered
@@ -108,7 +108,7 @@ impl Status {
 
         match reason.as_str() {
             "breakpoint-hit" => {
-                let number = payload.remove_expect("bkptno")?.expect_number()?;
+                let number = payload.remove_expect("bkptno")?.expect_signed()?;
                 Self::stopped_from_payload(Some(StopReason::Breakpoint { number }), payload)
             }
             "watchpoint-trigger" => {
