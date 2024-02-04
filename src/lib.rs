@@ -394,6 +394,34 @@ impl Gdb {
             .expect_msg_is("running")
     }
 
+    pub async fn exec_next_instruction(&self) -> Result<(), Error> {
+        self.raw_cmd("-exec-next-instruction")
+            .await?
+            .expect_result()?
+            .expect_msg_is("running")
+    }
+
+    pub async fn exec_next_instruction_reverse(&self) -> Result<(), Error> {
+        self.raw_cmd("-exec-next-instruction --reverse")
+            .await?
+            .expect_result()?
+            .expect_msg_is("running")
+    }
+
+    pub async fn exec_step_instruction(&self) -> Result<(), Error> {
+        self.raw_cmd("-exec-step-instruction")
+            .await?
+            .expect_result()?
+            .expect_msg_is("running")
+    }
+
+    pub async fn exec_step_instruction_reverse(&self) -> Result<(), Error> {
+        self.raw_cmd("-exec-step-instruction --reverse")
+            .await?
+            .expect_result()?
+            .expect_msg_is("running")
+    }
+
     pub async fn exec_step(&self) -> Result<(), Error> {
         self.raw_cmd("-exec-step")
             .await?
