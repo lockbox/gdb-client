@@ -422,7 +422,7 @@ impl Gdb {
 
     pub async fn break_insert_address(&self, at: u64) -> Result<Breakpoint, Error> {
         let raw = self
-            .raw_cmd(format!("-break-insert {at}"))
+            .raw_cmd(format!("-break-insert *{at}"))
             .await?
             .expect_result()?
             .expect_payload()?
