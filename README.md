@@ -6,8 +6,8 @@ Forked repo thats expanding to a more general use case as the old repo focused e
 working on getting the following upstreamed into this repo
 - [x] remove some integer overflow panics
 - [x] don't oom on empty stdout/stdin buffers
-- [ ] breakpoints support having negative id's (hidden breakpoint)
-- [ ] support address based breakpoint insertion
+- [x] breakpoints support having negative id's (hidden breakpoint)
+- [x] support address based breakpoint insertion
 - [ ] rework event loop
 - [ ] more e2e testing
 - [ ] typing for reading / writing memory

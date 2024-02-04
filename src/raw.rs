@@ -195,7 +195,7 @@ impl Value {
         if let Self::List(val) = self {
             Ok(val)
         } else {
-            error!("Expected dict, got: {:?}", self);
+            error!("Expected list, got: {:?}", self);
             Err(Error::ExpectedDifferentPayload)
         }
     }
@@ -204,7 +204,18 @@ impl Value {
         let val = if let Self::String(val) = self {
             Ok(val)
         } else {
-            error!("Expected dict, got: {:?}", self);
+            error!("Expected number (u32), got: {:?}", self);
+            Err(Error::ExpectedDifferentPayload)
+        }?;
+
+        Ok(val.parse()?)
+    }
+
+    pub fn expect_signed(self) -> Result<i64, Error> {
+        let val = if let Self::String(val) = self {
+            Ok(val)
+        } else {
+            error!("Expected signed number (i64), got: {:?}", self);
             Err(Error::ExpectedDifferentPayload)
         }?;
 

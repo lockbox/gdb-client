@@ -9,7 +9,7 @@ use std::{
     borrow::Cow, collections::HashMap, fmt, num::NonZeroUsize, process::Stdio, time::Duration,
 };
 
-use breakpoint::{Breakpoint, LineSpec};
+use breakpoint::{Addr, Breakpoint, LineSpec};
 use camino::Utf8PathBuf;
 use checkpoint::Checkpoint;
 use frame::Frame;
@@ -411,6 +411,18 @@ impl Gdb {
     pub async fn break_insert(&self, at: LineSpec) -> Result<Breakpoint, Error> {
         let raw = self
             .raw_cmd(format!("-break-insert {}", at.serialize()))
+            .await?
+            .expect_result()?
+            .expect_payload()?
+            .remove_expect("bkpt")?
+            .expect_dict()?;
+
+        Breakpoint::from_raw(raw)
+    }
+
+    pub async fn break_insert_address(&self, at: u64) -> Result<Breakpoint, Error> {
+        let raw = self
+            .raw_cmd(format!("-break-insert {}", at))
             .await?
             .expect_result()?
             .expect_payload()?
