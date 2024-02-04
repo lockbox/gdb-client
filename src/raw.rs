@@ -82,9 +82,7 @@ impl Response {
     }
 
     fn _into_error(payload: Option<Dict>) -> Result<GdbError, Error> {
-        let mut payload = if let Some(payload) = payload {
-            payload
-        } else {
+        let Some(mut payload) = payload else {
             return Err(Error::ExpectedPayload);
         };
 

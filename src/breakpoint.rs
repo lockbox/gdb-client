@@ -34,9 +34,9 @@ impl LineSpec {
     #[must_use]
     pub fn serialize(self) -> String {
         match self {
-            Self::Line { file, num } => format!("{}:{}", file, num),
+            Self::Line { file, num } => format!("{file}:{num}"),
             Self::Function(name) => name,
-            Self::FunctionExplicitFile { file, name } => format!("{}:{}", file, name),
+            Self::FunctionExplicitFile { file, name } => format!("{file}:{name}"),
         }
     }
 }

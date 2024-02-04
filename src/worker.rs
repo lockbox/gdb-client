@@ -255,12 +255,12 @@ async fn write_stdin(
     msg: &str,
 ) -> Result<(), FatalError> {
     let mut input = token.serialize();
-    input.push_str(&msg);
+    input.push_str(msg);
     input.push('\n');
 
     debug!("Sending to gdb {}", input);
     stdin
-        .write_all(&input.as_bytes())
+        .write_all(input.as_bytes())
         .await
         .map_err(FatalError::Stdin)?;
 
@@ -274,11 +274,11 @@ async fn process_stdout(result: io::Result<usize>, state: &mut State) -> Result<
     trace!("Found stdout: {}", line);
 
     // no data
-    if line.len() == 0 {
+    if line.is_empty() {
         return Ok(());
     }
 
-    let response = parse_message(&line).map_err(TransientError::from)?;
+    let response = parse_message(line).map_err(TransientError::from)?;
     state.stdout_buf.clear();
 
     match response {
@@ -292,9 +292,7 @@ async fn process_parsed_response(
     state: &mut State,
     response: parser::Response,
 ) -> Result<(), Error> {
-    let token = if let Some(token) = response.token() {
-        token
-    } else {
+    let Some(token) = response.token() else {
         match response {
             parser::Response::Notify {
                 message, payload, ..
@@ -312,7 +310,7 @@ async fn process_parsed_response(
         if token == pending_token {
             match Response::from_parsed(response) {
                 Ok(response) => {
-                    let mut pending = state.pending_console.as_mut().unwrap();
+                    let pending = state.pending_console.as_mut().unwrap();
                     pending.response = Some(response);
 
                     if pending.lines.len() != pending.target.get() {
@@ -335,9 +333,7 @@ async fn process_parsed_response(
         }
     }
 
-    let out = if let Some(out) = state.pending.remove(&token) {
-        out
-    } else {
+    let Some(out) = state.pending.remove(&token) else {
         warn!(
             "Got unexpected token {:?}, so ignoring: {:?}",
             token, response
@@ -428,6 +424,7 @@ async fn process_parsed_general(
     Ok(())
 }
 
+#[allow(clippy::unused_async)] // uniform api when processing input streams
 async fn process_stderr(result: io::Result<usize>, state: &mut State) -> Result<(), Error> {
     result.map_err(FatalError::Stderr)?;
 
@@ -435,7 +432,7 @@ async fn process_stderr(result: io::Result<usize>, state: &mut State) -> Result<
     trace!("found stderr: {}", line);
 
     // no data
-    if line.len() == 0 {
+    if line.is_empty() {
         return Ok(());
     }
 

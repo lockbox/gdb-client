@@ -9,14 +9,14 @@ use std::{
     borrow::Cow, collections::HashMap, fmt, num::NonZeroUsize, process::Stdio, time::Duration,
 };
 
-use breakpoint::{Addr, Breakpoint, LineSpec};
+use breakpoint::{Breakpoint, LineSpec};
 use camino::Utf8PathBuf;
 use checkpoint::Checkpoint;
 use frame::Frame;
 use rand::Rng;
 use status::Status;
 use tokio::{io, process, sync::mpsc, time};
-use tracing::{debug, error, info};
+use tracing::{error, info};
 use variable::Variable;
 
 pub mod address;
@@ -196,7 +196,7 @@ impl GdbBuilder {
                 } else {
                     process::Command::new("gdb")
                 };
-                cmd.args(&["--interpreter=mi3", "--quiet", self.target.as_str()]);
+                cmd.args(["--interpreter=mi3", "--quiet", self.target.as_str()]);
                 cmd
             },
             |tt| {
@@ -207,11 +207,11 @@ impl GdbBuilder {
                 let mut cmd = process::Command::new(program);
                 cmd.arg("replay");
                 if self.is_rust {
-                    cmd.args(&["-d", "rust-gdb"]);
+                    cmd.args(["-d", "rust-gdb"]);
                 }
                 cmd.arg("--mark-stdio");
                 cmd.arg(self.target.as_str());
-                cmd.args(&["--", "--interpreter=mi3", "--quiet"]);
+                cmd.args(["--", "--interpreter=mi3", "--quiet"]);
                 cmd
             },
         );
@@ -422,7 +422,7 @@ impl Gdb {
 
     pub async fn break_insert_address(&self, at: u64) -> Result<Breakpoint, Error> {
         let raw = self
-            .raw_cmd(format!("-break-insert {}", at))
+            .raw_cmd(format!("-break-insert {at}"))
             .await?
             .expect_result()?
             .expect_payload()?
@@ -441,7 +441,7 @@ impl Gdb {
             raw.push_str(&format!("{} ", bp.number));
         }
 
-        self.raw_cmd(format!("-break-disable {}", raw))
+        self.raw_cmd(format!("-break-disable {raw}"))
             .await?
             .expect_result()?
             .expect_msg_is("done")
@@ -456,7 +456,7 @@ impl Gdb {
             raw.push_str(&format!("{} ", bp.number));
         }
 
-        self.raw_cmd(format!("-break-delete {}", raw))
+        self.raw_cmd(format!("-break-delete {raw}"))
             .await?
             .expect_result()?
             .expect_msg_is("done")
@@ -479,7 +479,7 @@ impl Gdb {
     /// If `max` is provided, don't count beyond it.
     pub async fn stack_depth(&self, max: Option<u32>) -> Result<u32, Error> {
         let msg = if let Some(max) = max {
-            Cow::Owned(format!("-stack-info-depth {}", max))
+            Cow::Owned(format!("-stack-info-depth {max}"))
         } else {
             Cow::Borrowed("-stack-info-depth")
         };

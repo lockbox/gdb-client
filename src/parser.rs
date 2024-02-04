@@ -363,7 +363,7 @@ mod tests {
     #[test]
     fn test_escape_sequences() -> Result {
         assert_eq!(
-            Message::from(GeneralMessage::Console("".into())),
+            Message::from(GeneralMessage::Console(String::new())),
             parse_message(r#"~"""#)?
         );
 
@@ -373,7 +373,7 @@ mod tests {
         );
 
         assert_eq!(
-            Message::from(GeneralMessage::Target("".into())),
+            Message::from(GeneralMessage::Target(String::new())),
             parse_message(r#"@"""#)?
         );
 
@@ -383,7 +383,7 @@ mod tests {
         );
 
         assert_eq!(
-            Message::from(GeneralMessage::Log("".into())),
+            Message::from(GeneralMessage::Log(String::new())),
             parse_message(r#"&"""#)?
         );
 
