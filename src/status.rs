@@ -98,13 +98,11 @@ impl Status {
     }
 
     fn parse_msg_stopped(mut payload: raw::Dict) -> Result<Self, Error> {
-        let reason = if let Some(reason) = payload
+        let Some(reason) = payload
             .remove("reason")
             .map(raw::Value::expect_string)
             .transpose()?
-        {
-            reason
-        } else {
+        else {
             return Self::stopped_from_payload(None, payload);
         };
 

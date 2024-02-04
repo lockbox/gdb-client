@@ -36,7 +36,7 @@ pub fn build(name: &str) -> String {
             "--out-dir",
             "../.out"
         )
-        .dir(format!("samples/{}", name))
+        .dir(format!("samples/{name}"))
         .stdin_null()
         .stdout_null()
         .stderr_null()
@@ -44,7 +44,7 @@ pub fn build(name: &str) -> String {
         .expect("Failed to build sample");
         built.insert(name.to_owned());
     }
-    format!("samples/.out/{}", name)
+    format!("samples/.out/{name}")
 }
 
 #[cfg(feature = "test_rr")]
