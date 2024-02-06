@@ -359,24 +359,30 @@ async fn process_response_notify(
         debug!("New status {:?}", state.status);
 
         let to_notify = &mut state.notify_next_status;
-        debug!("Notifying {} watchers of status", to_notify.len());
+        debug!("Notifying {} watchers of `next status`", to_notify.len());
         for out in to_notify.drain(..) {
             send(&out, state.status.clone()).await?;
         }
 
-        let mut to_remove = Vec::new();
+        let mut specific_awaiters = Vec::new();
         for (idx, (pred, out)) in state.status_awaiters.iter().enumerate() {
             if pred(&state.status) {
                 send(out, state.status.clone()).await?;
-                to_remove.push(idx);
+                specific_awaiters.push(idx);
             }
         }
         debug!(
-            "{} were awaiting this status, {} remain",
-            to_remove.len(),
-            state.status_awaiters.len() - to_remove.len()
+            "Notified {} watchers for `{:?}`",
+            specific_awaiters.len(),
+            state.status,
         );
-        for idx in to_remove {
+
+        debug!(
+            "{} were awaiting this status, {} remain",
+            specific_awaiters.len(),
+            state.status_awaiters.len() - specific_awaiters.len()
+        );
+        for idx in specific_awaiters {
             drop(state.status_awaiters.remove(idx));
         }
     }
