@@ -27,7 +27,7 @@ pub enum StopReason {
     /// A breakpoint was reached
     Breakpoint { number: i64 },
     /// A watchpoint was triggered
-    Watchpoint,
+    Watchpoint { number: i64 },
     /// A read watchpoint was triggered
     ReadWatchpoint,
     /// An access watchpoint was triggered
@@ -112,7 +112,12 @@ impl Status {
                 Self::stopped_from_payload(Some(StopReason::Breakpoint { number }), payload)
             }
             "watchpoint-trigger" => {
-                Self::stopped_from_payload(Some(StopReason::Watchpoint), payload)
+                let number = payload
+                    .remove_expect("wpt")?
+                    .expect_dict()?
+                    .remove_expect("number")?
+                    .expect_signed()?;
+                Self::stopped_from_payload(Some(StopReason::Watchpoint { number }), payload)
             }
             "read-watchpoint-trigger" => {
                 Self::stopped_from_payload(Some(StopReason::ReadWatchpoint), payload)
